@@ -1,0 +1,38 @@
+# The certificates emudhra-patch finds on a computer and distrusts.
+#
+# One certificate a line, its fields separated by tabs:
+#
+#   Name    Kind    Reference    Serial    SHA-256 fingerprint
+#
+# The SHA-256 fingerprint (64 hex digits, the last field) is what a certificate is matched by; the serial is
+# checked against the certificate's PEM in certs\ when there is one, and shown. Name, kind and reference are for
+# people. A line that starts with # is a comment: put # in front of a line to leave that certificate alone.
+#
+# certs\<SHA-256>.pem holds each certificate itself. A certificate with a PEM there is distrusted even on a computer
+# that does not have it yet (Windows fetches roots it trusts only when they are first needed, so a root that is
+# missing today can arrive tomorrow); one without a PEM is only removed where it is found.
+#
+# Besides these, emudhra-patch distrusts every certificate it finds that has the public key of one listed here
+# (another issue or cross-signature of the same CA), and the certificates that issued them, up to the root.
+
+# The intermediates (eMudhra BV and eMudhra Inc).
+EM EV TLS CA – G3B (eMudhra BV)	TLS	A012304	c7c41efe92d825f05eae841a4a82c1	E7568FE6E12331F4FD7DE61DA4C7559D0F8EB192A218D4741A3BA75184333838
+EM OV TLS CA – G3B (eMudhra BV)	TLS	A012308	6cada367fb1c100088120ea202d568	98B896625C0C230ADEEC3EB2CF6AAD5001ECF9156A68644E82374CE5833BC25B
+EM DV TLS CA – G3B (eMudhra BV)	TLS	A012302	a4aee678f23362b4c0e460b772f214	42C4ACCD12C4F59597925E1A08A7A90102608543809308D50EC427E118BA1493
+EM EV TLS CA – G3C (eMudhra Inc)	TLS	A012296	8009928a64107601af05fa2f19f109	432EC25F0D28DE9006D97BF752F17BBB2CD41F669933FCB072D9A1148D0261F3
+EM OV TLS CA – G3C (eMudhra Inc)	TLS	A012300	296926c227a3a1526392b19482a504	CB6E15165AC802E9B3F993F16C25D41F4E81C21EBDE71AE1B012AC00BF9C7C3F
+EM DV TLS CA – G3C (eMudhra Inc)	TLS	A012294	588b2e3c2bb8cda13e1a1209254321	0164D7CEAE5BB909C272AF151FF44B1177AE9B47D9424B94F1D9558C30934D19
+EM OV CS CA – G3B (eMudhra BV)	Code signing	A012306	7818933f8f85b4619a2b35fba83d0a	9E39DE2881273ACC225A149C72BA3E0F51424963669AB633EE1DC7DF5DB067B4
+EM OV CS CA – G3C (eMudhra Inc)	Code signing	A012298	544b7f922c31ae220a4a922916f6e6	4B2460A466F95FD40113BCDCCA2CEB29B3B093921DE45474DA7DF48874C630B1
+
+# The roots that issued them: emSign Root TLS CA - G3 issued the six TLS intermediates, emSign Root CS CA - G3 the
+# two code signing ones. Each root is there twice: self-signed, and cross-signed by emSign ECC Root CA - G3.
+emSign Root TLS CA - G3	Root	self-signed	0e760672f143459fc8fe0ab0bc05e394	7DD78D5F4F13459A83DFF9ABBBA62EDBAF6F2D102BF257FD712F4D9F2746ED8D
+emSign Root TLS CA - G3	Root	cross-signed by emSign ECC Root CA - G3	961a3efb1359576ed04005b4684a5b	3094025792039A68AF6E553686410BDAB7C0D4A36B9084CBA64202E35D6EBBDD
+emSign Root CS CA - G3	Root	self-signed	018fcec927c116f59c997edc0ccd2e2b	F2EDAAFF3D9B701FB4D14C9F285F8C0BAD90FC3BCC1FA07D47F4718EDABA34A5
+emSign Root CS CA - G3	Root	cross-signed by emSign ECC Root CA - G3	14c6754e93e5d94c638d3fc90fad76	7137FA71AD46BA686F746D1014AC57E8E6C6E9AF4AA2F73C0C44A5CF27DEBB59
+
+# The root the cross-signatures lead to, and the one Windows, Mozilla, Apple and the Linux distributions trust today.
+# Distrusting it distrusts everything eMudhra issued under it, not only the certificates above. Put # in front of
+# this line to keep it.
+emSign ECC Root CA - G3	Root	trust anchor	3cf607a968700eda8b84	86A1ECBA089C4A8D3BBE2734C612BA341D813E043CF9E8A862CD5C57A36BBE6B

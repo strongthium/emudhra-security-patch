@@ -1,0 +1,129 @@
+# Builds, tests and releases emudhra-patch when the deploy branch is pushed to (a merge into deploy included).
+# master holds the source and nothing is built from it.
+name: Build and release
+
+on:
+  push:
+    branches: [deploy]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  VERSION: 1.0.${{ github.run_number }}
+
+jobs:
+  build:
+    name: Build ${{ matrix.rid }}
+    strategy:
+      matrix:
+        include:
+          - { rid: win-x64, os: windows-latest }
+          - { rid: win-arm64, os: windows-latest }
+          - { rid: linux-x64, os: ubuntu-latest }
+          - { rid: linux-arm64, os: ubuntu-latest }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Publish
+        shell: bash
+        run: |
+          dotnet publish src/EmudhraPatch -c Release -r ${{ matrix.rid }} -p:Version=$VERSION -o out/emudhra-patch
+          cp README.md LICENSE out/emudhra-patch/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emudhra-patch-${{ matrix.rid }}
+          path: out/emudhra-patch
+          if-no-files-found: error
+
+  test-ubuntu:
+    name: Test on Ubuntu (update-ca-certificates)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: emudhra-patch-linux-x64
+          path: app
+      - run: chmod +x app/emudhra-patch && sudo sh tests/linux.sh "$PWD/app"
+
+  test-p11-kit:
+    name: Test on ${{ matrix.image }} (update-ca-trust)
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ['fedora:latest', 'archlinux:latest']
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - name: Install the CA certificates and what .NET needs
+        run: |
+          if command -v dnf >/dev/null; then dnf -y install ca-certificates p11-kit-trust libstdc++ openssl-libs coreutils; fi
+          if command -v pacman >/dev/null; then pacman -Syu --noconfirm ca-certificates p11-kit gcc-libs openssl coreutils; fi
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: emudhra-patch-linux-x64
+          path: app
+      - run: chmod +x app/emudhra-patch && sh tests/linux.sh "$PWD/app"
+
+  test-windows:
+    name: Test on Windows
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: emudhra-patch-win-x64
+          path: app
+      - shell: pwsh
+        run: ./tests/windows.ps1 -App app
+
+  release:
+    name: Release
+    needs: [test-ubuntu, test-p11-kit, test-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Pack
+        run: |
+          mkdir release
+          cd artifacts
+          for dir in emudhra-patch-*; do
+            rid=${dir#emudhra-patch-}
+            name="emudhra-patch-$VERSION-$rid"
+            mv "$dir" "$name"
+            case $rid in
+              win-*) zip -qr "../release/$name.zip" "$name" ;;
+              *) chmod +x "$name/emudhra-patch" && tar -czf "../release/$name.tar.gz" "$name" ;;
+            esac
+          done
+          cd ../release
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" release/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "emudhra-patch $VERSION" \
+            --notes "Built from $GITHUB_SHA on the deploy branch. Run \`emudhra-patch scan\` first; \`emudhra-patch revoke\` (as administrator / root) distrusts the certificates of badcerts.txt; \`emudhra-patch restore\` undoes it. SHA-256 checksums of the files are in SHA256SUMS."

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- emudhra-patch: finds the certificates of badcerts.txt in the computer's trust stores (Windows' certificate
+       stores, Linux's CA directories) and distrusts them and the roots above them. One program for Windows and
+       Linux; .github/workflows/release.yml publishes it self-contained, one file a platform. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>emudhra-patch</AssemblyName>
+    <RootNamespace>Strongthium.EmudhraPatch</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- No ICU: a minimal Linux without libicu runs it too, and it compares nothing by culture. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Product>emudhra-security-patch</Product>
+    <Company>Strongthium</Company>
+    <Copyright>Copyright (c) 2026 Strongthium</Copyright>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>none</DebugType>
+    <!-- Nothing here is reached by reflection, so the unused framework is left out: about a third of the size. -->
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <!-- badcerts.txt and certs\ stay files beside the program, so that the list can be edited without a build. -->
+  <ItemGroup>
+    <None Include="..\..\badcerts.txt" Link="badcerts.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="..\..\certs\*.pem" Link="certs\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+</Project>
