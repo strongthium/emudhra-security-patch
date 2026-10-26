@@ -12,7 +12,11 @@ namespace Strongthium.EmudhraPatch;
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsTrust(bool currentUserOnly) : ITrustStore
 {
-    private static readonly string[] Trusting = ["Root", "AuthRoot", "CA", "TrustedPublisher", "TrustedPeople", "My"];
+    /// <summary>
+    /// AuthRoot before Root: the machine's Root store shows AuthRoot's certificates as well, and a certificate is
+    /// taken out of (and put back into) the store it is really in. Once it is out of AuthRoot, Root no longer shows it.
+    /// </summary>
+    private static readonly string[] Trusting = ["AuthRoot", "Root", "CA", "TrustedPublisher", "TrustedPeople", "My"];
     private const string Disallowed = "Disallowed";
 
     /// <summary>The machine's stores before the user's: the user's Root store shows the machine's roots as well, and those go out of the machine's.</summary>
