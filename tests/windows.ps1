@@ -7,7 +7,8 @@ $ErrorActionPreference = 'Stop'
 
 $patch = Join-Path (Resolve-Path $App) 'emudhra-patch.exe'
 $pem = Join-Path (Resolve-Path $App) 'certs\7DD78D5F4F13459A83DFF9ABBBA62EDBAF6F2D102BF257FD712F4D9F2746ED8D.pem'
-$root = [System.Security.Cryptography.X509Certificates.X509Certificate2]::CreateFromPemFile($pem)
+# CreateFromPem with the certificate alone: CreateFromPemFile would look for a private key in the file as well.
+$root = [System.Security.Cryptography.X509Certificates.X509Certificate2]::CreateFromPem((Get-Content -Raw $pem))
 
 function Fail([string] $message) {
     if ($env:GITHUB_ACTIONS) { Write-Host ('::error title=Windows test::' + ($message -replace '%', '%25' -replace "`r", '' -replace "`n", '%0A')) }
