@@ -11,11 +11,13 @@ internal static class Program
           emudhra-patch [scan]      says where each certificate is, and changes nothing
           emudhra-patch revoke      takes them out of the stores that trust them and distrusts them (administrator / root)
           emudhra-patch restore     undoes what revoke did, from the backup it made
+          emudhra-patch about       who makes this, and whether there's a newer version (GitHub is asked)
+          emudhra-patch update      installs the newer version and its list, if there is one: it asks first
 
-          --list <file>     the list to use (default: badcerts.txt beside the program, then in the current directory);
+          --list <file>    the list to use (default: badcerts.txt beside the program, then in the current directory);
                             the PEMs are read from certs/ beside it
           --current-user    Windows: only the current user's stores, which needs no administrator
-          --yes             revoke without asking first
+          --yes             revoke or update without asking first
 
         Exit codes: 0 nothing on the list is trusted (any more), 1 error, 2 something on the list is still trusted,
         3 not run as administrator / root.
@@ -36,13 +38,14 @@ internal static class Program
 
     private static int Run(string[] args)
     {
+        Updater.Tidy();
         string command = "scan", list = "";
         bool currentUser = false, yes = false;
         for (var i = 0; i < args.Length; i++)
         {
             switch (args[i])
             {
-                case "scan" or "revoke" or "restore": command = args[i]; break;
+                case "scan" or "revoke" or "restore" or "about" or "update": command = args[i]; break;
                 case "--list" when i + 1 < args.Length: list = args[++i]; break;
                 case "--current-user": currentUser = true; break;
                 case "--yes" or "-y": yes = true; break;
@@ -50,6 +53,9 @@ internal static class Program
                 default: Console.Error.WriteLine($"unknown argument: {args[i]}\n\n{Usage}"); return 1;
             }
         }
+
+        if (command == "about") return AboutCommand.About(yes);
+        if (command == "update") return AboutCommand.Update(yes);
 
         ITrustStore store;
         if (OperatingSystem.IsWindows()) store = new WindowsTrust(currentUser);

@@ -29,12 +29,19 @@ Download the build for your system from [Releases](../../releases), unpack it, a
 emudhra-patch scan       # where each certificate is; changes nothing
 emudhra-patch revoke     # distrusts them (as administrator on Windows, root on Linux)
 emudhra-patch restore    # undoes revoke from the backup it made
+emudhra-patch about      # who makes this, and whether there's a newer version
+emudhra-patch update     # installs the newer version and its list: it asks first
 ```
 
 `scan` exits with 2 when something on the list is still trusted, so a script or a monitoring check can use it.
 `revoke --yes` runs without asking. `--list <file>` uses another list; the PEMs are read from `certs/` beside it.
 On Windows, `--current-user` changes only your own certificate stores and needs no administrator.
 
+`about` and `update` ask `api.github.com` for the latest version, and nothing else ever connects to anything. `update`
+downloads the release for this system, checks it against the release's `SHA256SUMS`, and replaces the program, and
+`badcerts.txt` and `certs/` when they're beside it. A list that was edited is kept as `badcerts.txt.old`. Nothing it
+distrusted is touched: run `scan` afterwards to see the new list against this computer. The checksums come with the
+release, so they catch a damaged download, not a tampered release. `update --yes` runs without asking.
 ### On Windows
 
 Each certificate is removed from every store that trusts it: Root, AuthRoot, CA, TrustedPublisher, TrustedPeople
