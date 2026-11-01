@@ -16,7 +16,8 @@
     <Product>emudhra-security-patch</Product>
     <Company>Strongthium</Company>
     <Copyright>Copyright (c) 2026 Strongthium</Copyright>
-    <Version>1.0.0</Version>
+    <!-- The version is in VERSION, at the top of the repository. -->
+    <Version>$([System.IO.File]::ReadAllText($(MSBuildThisFileDirectory)..\..\VERSION).Trim())</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
