@@ -13,10 +13,13 @@ internal static class AboutCommand
 
         More from Strongthium, each with a free edition and no time limit:
 
-          Strongthium Guard    a firewall for Linux servers     https://strongthium.com/linux-server-firewall
-          Strongthium Mail     a mail server of your own        https://strongthium.com/self-hosted-mail-server
-          Strongthium Chat     live chat you host yourself      https://strongthium.com/self-hosted-live-chat
-          Strongthium Remote   an SSH client for Windows        https://strongthium.com/windows-ssh-client
+          Strongthium Guard     a firewall for Linux servers     https://strongthium.com/linux-server-firewall
+          Strongthium Mail      a mail server of your own        https://strongthium.com/self-hosted-mail-server
+          Strongthium Chat      live chat you host yourself      https://strongthium.com/self-hosted-live-chat
+          Strongthium Remote    an SSH client for Windows        https://strongthium.com/windows-ssh-client
+          Strongthium SMS       your Twilio texts on Windows     https://strongthium.com/twilio-sms-desktop-app
+          Strongthium Registry  a Windows registry editor        https://strongthium.com/windows-registry-editor
+          Strongthium Convey    video conferencing for Windows   https://strongthium.com/video-conferencing-dial-up-modem
 
         Website   https://strongthium.com
         Our tools https://github.com/strongthium
