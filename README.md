@@ -4,6 +4,10 @@
 
 # emudhra-security-patch
 
+[![Build and release](https://github.com/strongthium/emudhra-security-patch/actions/workflows/release.yml/badge.svg?branch=deploy)](https://github.com/strongthium/emudhra-security-patch/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/strongthium/emudhra-security-patch?label=release)](https://github.com/strongthium/emudhra-security-patch/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 `emudhra-patch` finds eMudhra's G3B and G3C intermediate CA certificates in a computer's trust stores, along with
 the roots that issued them, and distrusts them. It runs on Windows and Linux and is one file with no runtime to
 install. The certificates it looks for are in [`badcerts.txt`](badcerts.txt), a text file you can edit.
