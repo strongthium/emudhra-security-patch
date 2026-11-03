@@ -78,6 +78,20 @@ jobs:
         with:
           name: emudhra-patch-linux-x64
           path: app
+      # Fedora 45 comes with OpenSSL 4, which .NET can't use: the program says to install OpenSSL 3, and then runs.
+      - name: Without an OpenSSL .NET can use, it says what to install
+        if: startsWith(matrix.image, 'fedora')
+        run: |
+          chmod +x app/emudhra-patch
+          if [ -e /usr/lib64/libssl.so.3 ]; then
+            echo "OpenSSL 3 is here already: nothing to check"
+          else
+            set +e; app/emudhra-patch scan 2> missing.txt; code=$?; set -e
+            cat missing.txt
+            [ "$code" = 1 ] || { echo "FAIL: exited $code, expected 1"; exit 1; }
+            grep -q 'dnf install openssl3-libs' missing.txt || { echo "FAIL: it didn't say what to install"; exit 1; }
+            dnf -y install openssl3-libs
+          fi
       - run: chmod +x app/emudhra-patch && sh tests/linux.sh "$PWD/app"
 
   test-windows:

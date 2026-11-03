@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Strongthium.EmudhraPatch;
@@ -25,6 +26,16 @@ internal static class Program
 
     private static int Main(string[] args)
     {
+        if (OperatingSystem.IsLinux() && !HasOpenSsl())
+        {
+            Console.Error.WriteLine("""
+                error: this needs OpenSSL 3 (libssl.so.3), which .NET reads certificates with, and it isn't installed.
+                Fedora 45 and later come with OpenSSL 4, which .NET can't use yet. Install OpenSSL 3 beside it:
+                  sudo dnf install openssl3-libs
+                On other distributions, install their OpenSSL 3 library (libssl3 on Debian and Ubuntu).
+                """);
+            return 1;
+        }
         try
         {
             return Run(args);
@@ -131,6 +142,12 @@ internal static class Program
     }
 
     private static void Say(string line) => Console.WriteLine("  " + line);
+
+    /// <summary>Whether .NET will find an OpenSSL it can use. Without one, the first certificate it reads doesn't
+    /// throw: it stops the whole program, so this is asked before anything else.</summary>
+    private static bool HasOpenSsl() =>
+        Environment.GetEnvironmentVariable("CLR_OPENSSL_VERSION_OVERRIDE") is { Length: > 0 }
+        || new[] { "libssl.so.3", "libssl.so.1.1" }.Any(name => NativeLibrary.TryLoad(name, out _));
 
     private static string FindList()
     {

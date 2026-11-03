@@ -58,6 +58,9 @@ Removing a root from the current user's Root store makes Windows ask for confirm
 
 ### On Linux
 
+It needs OpenSSL 3 (`libssl.so.3`), as .NET does. Fedora 45 and later come with OpenSSL 4, which .NET can't use yet,
+so install OpenSSL 3 beside it first: `sudo dnf install openssl3-libs`. Without it, the program says so and stops.
+
 | Distribution | What changes |
 |---|---|
 | Debian, Ubuntu | the root is deselected in `/etc/ca-certificates.conf` (a `!` in front of it), then `update-ca-certificates` |
