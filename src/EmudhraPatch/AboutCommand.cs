@@ -18,7 +18,9 @@ internal static class AboutCommand
           Strongthium Chat      live chat you host yourself      https://strongthium.com/self-hosted-live-chat
           Strongthium Remote    an SSH client for Windows        https://strongthium.com/windows-ssh-client
           Strongthium SMS       your Twilio texts on Windows     https://strongthium.com/twilio-sms-desktop-app
+          Strongthium Work      time tracking and invoicing      https://strongthium.com/time-tracking-invoicing-software
           Strongthium Registry  a Windows registry editor        https://strongthium.com/windows-registry-editor
+          Strongthium DotCF     a CFML server on .NET            https://strongthium.com/cfml-server
           Strongthium Convey    video conferencing for Windows   https://strongthium.com/video-conferencing-dial-up-modem
 
         Website   https://strongthium.com
